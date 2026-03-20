@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HomeBase — Household Chore Circles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1 — AUTH (Sign in / Sign up)
+══════════════════════════════════════════ -->
+<div id="screen-auth" class="screen active">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">🏠</div>
+      <div class="auth-logo-text">HomeBase</div>
+      <div class="auth-logo-sub">Household chores, actually balanced</div>
+    </div>
+
+    <div class="auth-tabs" role="tablist">
+      <div class="auth-tab active" role="tab" data-tab="login" onclick="authTab('login')">Sign In</div>
+      <div class="auth-tab"        role="tab" data-tab="signup" onclick="authTab('signup')">Create Account</div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="auth-login" onsubmit="doLogin(event)" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="login-email">Email</label>
+        <input class="form-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-pwd">Password</label>
+        <input class="form-input" id="login-pwd" type="password" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <div class="form-error" id="login-error"></div>
+      <button class="btn btn-primary btn-block" type="submit">Sign In →</button>
+      <p class="auth-hint">Demo: any email + password you used to sign up</p>
+    </form>
+
+    <!-- SIGNUP FORM -->
+    <form id="auth-signup" style="display:none" onsubmit="doSignup(event)" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="signup-name">Your Name</label>
+        <input class="form-input" id="signup-name" type="text" placeholder="What should we call you?" autocomplete="name" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signup-email">Email</label>
+        <input class="form-input" id="signup-email" type="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signup-pwd">Password</label>
+        <input class="form-input" id="signup-pwd" type="password" placeholder="min 6 characters" autocomplete="new-password" required minlength="6">
+      </div>
+      <div class="form-error" id="signup-error"></div>
+      <button class="btn btn-primary btn-block" type="submit">Create Account →</button>
+    </form>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2 — ONBOARDING (multi-step)
+══════════════════════════════════════════ -->
+<div id="screen-onboard" class="screen">
+  <div class="ob-progress-bar"><div id="ob-progress-fill"></div></div>
+  <div class="onboard-card">
+    <div class="onboard-steps" id="ob-steps" aria-label="Setup progress">
+      <!-- steps rendered by JS -->
+    </div>
+    <div id="ob-content">
+      <!-- step content rendered by JS -->
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 3 — MAIN APP
+══════════════════════════════════════════ -->
+<div id="screen-app" class="screen">
+
+  <!-- Mobile menu overlay -->
+  <div class="mobile-overlay" id="mob-overlay" onclick="toggleMobileMenu()" aria-hidden="true"></div>
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-row">
+        <button class="mobile-close-btn" onclick="toggleMobileMenu()" aria-label="Close menu">✕</button>
+        <span class="sidebar-logo-mark" aria-hidden="true">🏠</span>
+        <span class="sidebar-logo-text">HomeBase</span>
+      </div>
+      <!-- Circle badge — click to manage circle -->
+      <div class="circle-badge" id="circle-badge" onclick="showCircleInfo()" role="button" tabindex="0" aria-label="Circle settings">
+        <span id="sb-circle-name">My Circle</span>
+        <span class="circle-code" id="sb-circle-code" title="Share this code to invite people"></span>
+      </div>
+    </div>
+
+    <!-- Nav links -->
+    <div class="nav-sec">
+      <div class="nav-lbl">Views</div>
+      <button class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon" aria-hidden="true">📊</span>Dashboard</button>
+      <button class="nav-item" onclick="showPage('schedule')"><span class="nav-icon" aria-hidden="true">📅</span>Schedule</button>
+      <button class="nav-item" onclick="showPage('chores')"><span class="nav-icon" aria-hidden="true">✅</span>All Chores</button>
+      <button class="nav-item" onclick="showPage('members')"><span class="nav-icon" aria-hidden="true">👥</span>Members</button>
+    </div>
+
+    <div class="nav-sec">
+      <div class="nav-lbl">Tools</div>
+      <button class="nav-item" onclick="showPage('rules')"><span class="nav-icon" aria-hidden="true">⚙️</span>Rules</button>
+      <button class="nav-item" onclick="showPage('swaps')">
+        <span class="nav-icon" aria-hidden="true">🔄</span>Swaps
+        <span class="nav-badge" id="swap-badge-nav" aria-live="polite"></span>
+      </button>
+      <button class="nav-item" onclick="showPage('analytics')"><span class="nav-icon" aria-hidden="true">📈</span>Analytics</button>
+    </div>
+
+    <!-- Member filter -->
+    <div class="nav-sec">
+      <div class="nav-lbl">Filter by member</div>
+      <div id="member-filter-chips" role="group" aria-label="Filter by member"></div>
+    </div>
+
+    <!-- Sidebar footer -->
+    <div class="sidebar-footer">
+      <button class="nav-item nav-item-add" onclick="showAddChoreModal()">
+        <span class="nav-icon" aria-hidden="true">➕</span>Add Chore
+      </button>
+      <div class="current-user-row" id="current-user-row">
+        <div class="avatar" id="cu-avatar" aria-hidden="true">?</div>
+        <span class="cu-name" id="cu-name">You</span>
+        <button class="cu-logout" onclick="doLogout()" title="Sign out" aria-label="Sign out">⏏</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="main" id="main-content">
+
+    <!-- Mobile top bar -->
+    <div class="mobile-topbar">
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu">☰</button>
+      <span class="mobile-logo">🏠 HomeBase</span>
+    </div>
+
+    <!-- ── DASHBOARD PAGE ── -->
+    <div id="page-dashboard" class="page active" role="main">
+      <div class="ph">
+        <div>
+          <h1 class="ph-title" id="dash-greeting">Good morning!</h1>
+          <p class="ph-sub" id="dash-date"></p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-ghost btn-sm" onclick="generateWeek()">🔄 Auto-assign week</button>
+          <button class="btn btn-primary btn-sm" onclick="showAddChoreModal()">+ Add Chore</button>
+        </div>
+      </div>
+
+      <!-- Sanity alert -->
+      <div class="alert alert-warn" id="sanity-alert" role="status">
+        <span class="alert-icon" aria-hidden="true">🧠</span>
+        <div class="alert-body">
+          <strong class="alert-title">Household Sanity Check</strong>
+          <span id="sanity-msg">Generate a week to see the workload analysis.</span>
+        </div>
+        <button class="btn btn-ghost btn-xs" onclick="this.closest('.alert').style.display='none'" aria-label="Dismiss">✕</button>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-row" id="dash-stats" aria-label="Weekly stats"></div>
+
+      <!-- Two column layout -->
+      <div class="g2">
+        <section>
+          <h2 class="sec-title">Today's Chores</h2>
+          <div id="today-list"></div>
+        </section>
+        <section>
+          <h2 class="sec-title">Weekly Effort Balance</h2>
+          <div class="card" style="margin-bottom:16px">
+            <div id="effort-bars"></div>
+            <p style="font-size:11px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">Capacity adjusted per member settings</p>
+          </div>
+          <h2 class="sec-title">Streaks 🔥</h2>
+          <div class="g3" id="streak-cards"></div>
+        </section>
+      </div>
+
+      <section style="margin-top:22px">
+        <h2 class="sec-title">Coming Up This Week</h2>
+        <div id="upcoming-list"></div>
+      </section>
+    </div>
+
+    <!-- ── SCHEDULE PAGE ── -->
+    <div id="page-schedule" class="page">
+      <div class="ph">
+        <div>
+          <h1 class="ph-title">Schedule</h1>
+          <p class="ph-sub">Click to mark done · ✏️ to reassign</p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-ghost btn-sm" onclick="prevWeek()">← Prev</button>
+          <span id="week-label" style="font-size:13px;font-weight:600;padding:0 4px"></span>
+          <button class="btn btn-ghost btn-sm" onclick="nextWeek()">Next →</button>
+        </div>
+      </div>
+      <div class="sch-wrap" id="schedule-cal" role="grid" aria-label="Weekly schedule"></div>
+      <div id="schedule-list" style="margin-top:20px"></div>
+    </div>
+
+    <!-- ── CHORES PAGE ── -->
+    <div id="page-chores" class="page">
+      <div class="ph">
+        <h1 class="ph-title">All Chores</h1>
+        <div class="ph-actions">
+          <button class="btn btn-ghost btn-sm" onclick="showAISuggestions()">✨ AI Suggestions</button>
+          <button class="btn btn-primary btn-sm" onclick="showAddChoreModal()">+ Add Chore</button>
+        </div>
+      </div>
+      <!-- Filter tabs -->
+      <div class="tabs" role="tablist" aria-label="Filter chores">
+        <button class="tab active" role="tab" onclick="choreFilterFn('all',this)">All</button>
+        <button class="tab" role="tab" onclick="choreFilterFn('daily',this)">Daily</button>
+        <button class="tab" role="tab" onclick="choreFilterFn('weekly',this)">Weekly</button>
+        <button class="tab" role="tab" onclick="choreFilterFn('monthly',this)">Monthly</button>
+        <button class="tab" role="tab" onclick="choreFilterFn('quarterly',this)">Quarterly</button>
+        <button class="tab" role="tab" onclick="choreFilterFn('flexible',this)">Flexible</button>
+      </div>
+      <div id="chores-list"></div>
+    </div>
+
+    <!-- ── MEMBERS PAGE ── -->
+    <div id="page-members" class="page">
+      <div class="ph">
+        <h1 class="ph-title">Circle Members</h1>
+        <button class="btn btn-ghost btn-sm" onclick="showInviteModal()">📨 Invite Someone</button>
+      </div>
+      <div class="g3" id="members-grid"></div>
+    </div>
+
+    <!-- ── RULES PAGE ── -->
+    <div id="page-rules" class="page">
+      <div class="ph">
+        <div>
+          <h1 class="ph-title">Rules Engine</h1>
+          <p class="ph-sub">Define custom logic for assignment</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="showAddRuleModal()">+ Add Rule</button>
+      </div>
+      <div id="rules-list"></div>
+    </div>
+
+    <!-- ── SWAPS PAGE ── -->
+    <div id="page-swaps" class="page">
+      <div class="ph"><h1 class="ph-title">Swap Requests</h1></div>
+      <div id="swaps-list"></div>
+    </div>
+
+    <!-- ── ANALYTICS PAGE ── -->
+    <div id="page-analytics" class="page">
+      <div class="ph"><h1 class="ph-title">Analytics</h1></div>
+      <div id="analytics-content"></div>
+    </div>
+
+  </main>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL (shared across all pages)
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalCheck(event)" role="dialog" aria-modal="true" aria-labelledby="modal-title-el">
+  <div class="modal" id="modal-box"></div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     TOAST NOTIFICATIONS
+══════════════════════════════════════════ -->
+<div class="toast-wrap" id="toast-wrap" role="region" aria-live="polite" aria-label="Notifications"></div>
+
+
+<script src="script.js"></script>
+</body>
+</html>
