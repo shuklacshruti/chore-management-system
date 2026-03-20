@@ -2,8 +2,6 @@
    HomeBase — script.js
    All app logic. localStorage-backed. Supabase-ready hooks marked.
 ══════════════════════════════════════════════════════════════ */
-'use strict';
-
 import { supabase } from './supabase.js'
 
 // ─────────────────────────────────────────────
